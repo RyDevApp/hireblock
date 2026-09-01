@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HIREBLOCK Early Access — People Placers Staffing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+    :root { --cyan: #00f5ff; }
+    body { font-family: Inter, system-ui, sans-serif; }
+    .logo { font-family: "Space Grotesk", sans-serif; }
+    .glass { background: rgba(15,23,42,.82); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.08); }
+    .grid-bg {
+      background-image: linear-gradient(rgba(0,245,255,.04) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0,245,255,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    input, select { background: #18181b; border: 1px solid rgba(255,255,255,.12); }
+    input:focus, select:focus { outline: none; border-color: #00f5ff; box-shadow: 0 0 0 3px rgba(0,245,255,.2); }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen grid-bg">
+  <div class="fixed top-0 inset-x-0 z-50 bg-amber-400 text-zinc-950 text-center text-xs sm:text-sm font-semibold py-2 px-3">
+    EARLY ACCESS — Public launch date TBD. New accounts are waitlisted. Do not use a real SSN on this demo.
+  </div>
+
+  <nav class="fixed top-8 inset-x-0 z-40 glass">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+      <div class="logo text-2xl tracking-tight">HIREBLOCK</div>
+      <div class="flex gap-3 text-sm">
+        <button onclick="show('signup')" class="hover:text-cyan-300">Request access</button>
+        <button onclick="show('login')" class="hover:text-cyan-300">Login</button>
+        <span class="hidden sm:inline px-3 py-1 rounded-full bg-white text-zinc-900 font-semibold">SecuredStaff™</span>
+      </div>
+    </div>
+  </nav>
+
+  <header class="pt-36 pb-16 px-5 max-w-6xl mx-auto">
+    <p class="text-cyan-400 text-xs tracking-[.25em] uppercase mb-4">Early access · People Placers Staffing</p>
+    <h1 class="logo text-5xl sm:text-7xl leading-none mb-5">Hire anonymously.<br>Reveal at your pace.</h1>
+    <p class="text-zinc-400 max-w-xl text-lg">
+      Credentialed professionals and employers mint an anonymous key from identity fields.
+      Raw PII never sits in the database — only a hash. Full matching after public launch.
+    </p>
+  </header>
+
+  <main class="max-w-xl mx-auto px-5 pb-24">
+    <section id="signup" class="glass rounded-3xl p-7">
+      <h2 class="logo text-3xl mb-2">Request early access</h2>
+      <p class="text-zinc-400 text-sm mb-6">Your key is created now. Live placements stay sealed until launch (TBD).</p>
+      <div class="flex bg-zinc-900 rounded-2xl p-1 mb-6">
+        <button id="tab-pro" onclick="setType('professional')" class="flex-1 py-3 rounded-2xl text-sm font-semibold bg-white text-zinc-900">Professional</button>
+        <button id="tab-co" onclick="setType('employer')" class="flex-1 py-3 rounded-2xl text-sm font-semibold">Employer</button>
+      </div>
+      <form id="signup-form" class="space-y-4" onsubmit="handleSignup(event)">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs uppercase tracking-widest text-zinc-500">First name</label>
+            <input id="s-first" required class="mt-1 w-full rounded-xl px-4 py-3" />
+          </div>
+          <div>
+            <label class="text-xs uppercase tracking-widest text-zinc-500">Last name</label>
+            <input id="s-last" required class="mt-1 w-full rounded-xl px-4 py-3" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-zinc-500">Middle name (optional)</label>
+          <input id="s-middle" class="mt-1 w-full rounded-xl px-4 py-3" placeholder="Leave blank if none" />
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-zinc-500">Birth date</label>
+          <input id="s-dob" type="date" required class="mt-1 w-full rounded-xl px-4 py-3" />
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-zinc-500">Identifier type</label>
+          <select id="s-idtype" class="mt-1 w-full rounded-xl px-4 py-3" onchange="hintId()"></select>
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-zinc-500">Identifier</label>
+          <input id="s-idval" required class="mt-1 w-full rounded-xl px-4 py-3 font-mono" />
+          <p id="s-idhint" class="text-xs text-zinc-500 mt-1"></p>
+        </div>
+        <p class="text-xs text-zinc-500">These fields are hashed in the browser and on the server. They are verified again at login. Official record checks happen only if both sides reach engagement after launch.</p>
+        <button class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-400 to-violet-600 font-semibold">Create my early-access key</button>
+      </form>
+    </section>
+
+    <section id="login" class="glass rounded-3xl p-7 hidden">
+      <h2 class="logo text-3xl mb-2">Login</h2>
+      <p class="text-zinc-400 text-sm mb-6">Re-enter the same identity fields. The hash must match.</p>
+      <form class="space-y-4" onsubmit="handleLogin(event)">
+        <div>
+          <label class="text-xs uppercase tracking-widest text-zinc-500">Username</label>
+          <input id="l-user" required class="mt-1 w-full rounded-xl px-4 py-3 font-mono" placeholder="pro-calm-lion-daring" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs uppercase tracking-widest text-zinc-500">First name</label>
+            <input id="l-first" required class="mt-1 w-full rounded-xl px-4 py-3" />
+          </div>
+          <div>
+            <label class="text-xs uppercase tracking-widest text-zinc-500">Last name</label>
+            <input id="l-last" required class="mt-1 w-full rounded-xl px-4 py-3" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-zinc-500">Middle name (optional)</label>
+          <input id="l-middle" class="mt-1 w-full rounded-xl px-4 py-3" />
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-zinc-500">Birth date</label>
+          <input id="l-dob" type="date" required class="mt-1 w-full rounded-xl px-4 py-3" />
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-zinc-500">Identifier type</label>
+          <select id="l-idtype" class="mt-1 w-full rounded-xl px-4 py-3"></select>
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-zinc-500">Identifier</label>
+          <input id="l-idval" required class="mt-1 w-full rounded-xl px-4 py-3 font-mono" />
+        </div>
+        <button class="w-full py-4 rounded-2xl bg-white text-zinc-900 font-semibold">Verify hash &amp; enter</button>
+      </form>
+    </section>
+
+    <section id="dash" class="glass rounded-3xl p-7 hidden">
+      <p class="text-amber-300 text-sm font-semibold mb-2">Early access · public launch TBD</p>
+      <h2 class="logo text-3xl mb-2">Welcome, <span id="dash-user" class="text-cyan-300"></span></h2>
+      <p id="dash-notice" class="text-zinc-400 text-sm mb-6"></p>
+      <div class="bg-zinc-900 rounded-2xl p-5 mb-4">
+        <h3 class="font-semibold mb-3">Preview matches (not live yet)</h3>
+        <ul id="match-list" class="space-y-3 text-sm text-zinc-300"></ul>
+      </div>
+      <button onclick="logout()" class="w-full py-3 rounded-2xl border border-white/20">Log out</button>
+    </section>
+  </main>
+
+  <footer class="text-center text-xs text-zinc-600 pb-10">
+    HIREBLOCK © 2026 · People Placers Staffing · SecuredStaff™ · Early access, launch date TBD
+  </footer>
+
+  <script>
+    const API = localStorage.getItem("hireblock_api") || "http://127.0.0.1:8000";
+    const ADJECTIVES = ["ancient","bold","calm","daring","eager","fierce","gentle","happy","inventive","joyful","keen","lively","mighty","noble","optimistic","peaceful","quick","radiant","strong","trusty","unique","vivid","wise","youthful","zealous","brave","clever","dynamic","elegant","fearless","graceful","heroic","insightful"];
+    const NOUNS = ["eagle","falcon","griffin","hawk","lion","phoenix","raven","tiger","wolf","bear","dragon","fox","horse","jaguar","knight","leopard","owl","panther","raptor","shark","turtle","unicorn","viper","walrus","zebra","arrow","blade","crown","echo","flame","glacier","harbor"];
+    let userType = "professional";
+    let token = localStorage.getItem("hireblock_jwt") || "";
+
+    const ID_OPTS = [
+      { v: "dl", l: "Driver license number" },
+      { v: "fein", l: "FEIN / TIN (employers)" },
+      { v: "ssn", l: "Social Security number (demo only)" },
+      { v: "address", l: "Most recent address" },
+    ];
+
+    function fillSelects() {
+      const html = ID_OPTS.map(o => `<option value="${o.v}">${o.l}</option>`).join("");
+      document.getElementById("s-idtype").innerHTML = html;
+      document.getElementById("l-idtype").innerHTML = html;
+      hintId();
+    }
+
+    function hintId() {
+      const t = document.getElementById("s-idtype").value;
+      const hints = {
+        dl: "Example: FL1234567",
+        fein: "Format: 12-3456789",
+        ssn: "Use a fake value on this demo. Format: 123-45-6789",
+        address: "Street, city, state, ZIP — at least 10 characters",
+      };
+      document.getElementById("s-idhint").textContent = hints[t] || "";
+      document.getElementById("s-idval").placeholder = hints[t] || "";
+    }
+
+    function setType(t) {
+      userType = t;
+      document.getElementById("tab-pro").className = "flex-1 py-3 rounded-2xl text-sm font-semibold" + (t === "professional" ? " bg-white text-zinc-900" : "");
+      document.getElementById("tab-co").className = "flex-1 py-3 rounded-2xl text-sm font-semibold" + (t === "employer" ? " bg-white text-zinc-900" : "");
+      if (t === "employer") document.getElementById("s-idtype").value = "fein";
+      hintId();
+    }
+
+    function show(id) {
+      ["signup","login","dash"].forEach(s => document.getElementById(s).classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+    }
+
+    function readPii(prefix) {
+      return {
+        first_name: document.getElementById(prefix + "-first").value.trim(),
+        middle_name: document.getElementById(prefix + "-middle").value.trim(),
+        last_name: document.getElementById(prefix + "-last").value.trim(),
+        dob: document.getElementById(prefix + "-dob").value,
+        id_type: document.getElementById(prefix + "-idtype").value,
+        id_value: document.getElementById(prefix + "-idval").value.trim(),
+      };
+    }
+
+    function validate(pii) {
+      if (pii.first_name.length < 2 || pii.last_name.length < 2) throw new Error("First and last name required.");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(pii.dob)) throw new Error("Birth date required.");
+      if (pii.id_type === "fein" && !/^\d{2}-\d{7}$/.test(pii.id_value)) throw new Error("FEIN must be XX-XXXXXXX.");
+      if (pii.id_type === "ssn" && !/^(\d{3}-\d{2}-\d{4}|\d{9})$/.test(pii.id_value)) throw new Error("SSN must be XXX-XX-XXXX.");
+      if (pii.id_type === "dl" && !/^[A-Za-z0-9-]{5,20}$/.test(pii.id_value)) throw new Error("Driver license must be 5-20 letters or numbers.");
+      if (pii.id_type === "address" && pii.id_value.length < 10) throw new Error("Address too short.");
+    }
+
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    function norm(v) { return String(v || "").trim().toUpperCase().replace(/\s+/g, ""); }
+
+    async function computeHash(pii) {
+      validate(pii);
+      const parts = [pii.first_name, pii.middle_name || "", pii.last_name, pii.dob, pii.id_type, pii.id_value];
+      let combined = "";
+      for (const p of parts) combined += await sha256(norm(p));
+      return sha256(combined);
+    }
+
+    function usernameFrom(hash, type) {
+      const a = ADJECTIVES[parseInt(hash.slice(0,8),16) % ADJECTIVES.length];
+      const n = NOUNS[parseInt(hash.slice(8,16),16) % NOUNS.length];
+      const b = ADJECTIVES[parseInt(hash.slice(16,24),16) % ADJECTIVES.length];
+      return `${type === "employer" ? "co" : "pro"}-${a}-${n}-${b}`;
+    }
+
+    async function api(path, body, method="POST") {
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = "Bearer " + token;
+      const res = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || res.statusText);
+      return data;
+    }
+
+    async function handleSignup(e) {
+      e.preventDefault();
+      const pii = readPii("s");
+      try {
+        validate(pii);
+        try {
+          const data = await api("/api/signup", { user_type: userType, pii });
+          token = data.access_token;
+          localStorage.setItem("hireblock_jwt", token);
+          enterDash(data);
+          return;
+        } catch (net) {
+          const hash = await computeHash(pii);
+          const username = usernameFrom(hash, userType);
+          const accounts = JSON.parse(localStorage.getItem("hireblock_accounts") || "{}");
+          if (accounts[username]) throw new Error("This identity already has a local key. Use Login.");
+          accounts[username] = { hash, type: userType };
+          localStorage.setItem("hireblock_accounts", JSON.stringify(accounts));
+          enterDash({
+            username,
+            notice: "Saved on this device only (API offline). Early access — public launch TBD.",
+            public_launch: "TBD",
+          });
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const pii = readPii("l");
+      const username = document.getElementById("l-user").value.trim();
+      try {
+        validate(pii);
+        try {
+          const data = await api("/api/login", { username, user_type: userType, pii });
+          token = data.access_token;
+          localStorage.setItem("hireblock_jwt", token);
+          enterDash(data);
+          return;
+        } catch (net) {
+          const accounts = JSON.parse(localStorage.getItem("hireblock_accounts") || "{}");
+          if (!accounts[username]) throw new Error(net.message || "Username not found.");
+          const hash = await computeHash(pii);
+          if (hash !== accounts[username].hash) throw new Error("Identity mismatch. Names, DOB, and identifier must match signup.");
+          enterDash({
+            username,
+            notice: "Local hash matched. Early access — public launch TBD.",
+            public_launch: "TBD",
+          });
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function enterDash(data) {
+      document.getElementById("dash-user").textContent = data.username;
+      document.getElementById("dash-notice").textContent = data.notice || ("Early access. Public launch: " + (data.public_launch || "TBD"));
+      const list = document.getElementById("match-list");
+      list.innerHTML = "<li>Loading preview seats…</li>";
+      show("dash");
+      try {
+        const matches = await api("/api/matches", null, "GET");
+        list.innerHTML = matches.map(m => `<li>${m.title} · ${m.match_username}</li>`).join("");
+      } catch {
+        list.innerHTML = "<li>Preview seats reserved after launch. Your key is on the waitlist.</li>";
+      }
+    }
+
+    function logout() {
+      token = "";
+      localStorage.removeItem("hireblock_jwt");
+      show("login");
+    }
+
+    fillSelects();
+    show("signup");
+  </script>
+</body>
+</html>
